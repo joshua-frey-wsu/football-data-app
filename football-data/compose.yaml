@@ -1,0 +1,34 @@
+services:
+  client:
+    restart: unless-stopped
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        - REACT_APP_API_URL=https://joshua-frey-wsu-server--3010.prod1a.defang.dev
+    ports:
+      - mode: ingress
+        target: 3000
+        published: 3000
+    deploy:
+      resources:
+        reservations:
+          memory: 2GB
+    depends_on:
+      - server
+  server:
+    restart: unless-stopped
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - target: 3010
+        mode: ingress
+        published: 3010
+    environment:
+     - DATABASE_URL    # To use your production database connection string, use `defang config set DATABASE_URL`
+     - FOOTBALL_DATA_API_KEY
+    #deploy:
+    #  resources:
+    #    reservations:
+    #      memory: 256M
