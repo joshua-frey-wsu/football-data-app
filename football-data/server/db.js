@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const Pool = require("pg").Pool;
 
 var parse = require('pg-connection-string').parse;

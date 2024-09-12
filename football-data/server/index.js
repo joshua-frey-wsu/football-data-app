@@ -64,35 +64,50 @@ const initializeDatabase = async () => {
       console.error('Error initializing database:', error);
     }
   };
+
+  // Middleware to check API key in headers
+const apiKeyMiddleware = (req, res, next) => {
+  const apiKey = req.headers['x-api-key'];
+
+  // Check if the API key is provided and matches the environment variable
+  if (apiKey && apiKey === process.env.PERSONAL_API_KEY) {
+    next(); // Continue to the next middleware or route
+  } else {
+    res.status(403).json({ 
+      error: 'Forbidden: Invalid or missing API key',
+     });
+  }
+};
+
   
   // Initialize the database
   initializeDatabase();
 
-  app.get('/api/matches', async (req, res) => {
-    try {
-      const response = await axios.get('https://api.football-data.org/v4/competitions/PL/matches', {
-        headers: { 'X-Auth-Token': process.env.FOOTBALL_DATA_API_KEY }
-      });
-      res.json(response.data);
-    } catch (error) {
-      res.status(500).send('Error fetching data');
-    }
-  });
-  
-  // REST API to fetch all Premier League teams
-  app.get('/api/teams', async (req, res) => {
-    try {
-      // Query to fetch all teams from the 'premier_league_teams' table
-      const query = 'SELECT * FROM premier_league_teams';
-      const result = await pool.query(query);
-  
-      // Respond with the fetched teams
-      res.json(result.rows);
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-      res.status(500).send('Error fetching teams from the database.');
-    }
-  });
+
+
+// Apply API key middleware to secure the /api/matches and /api/teams endpoints
+app.get('/api/matches', apiKeyMiddleware, async (req, res) => {
+  try {
+    const response = await axios.get('https://api.football-data.org/v4/competitions/PL/matches', {
+      headers: { 'X-Auth-Token': process.env.FOOTBALL_DATA_API_KEY }
+    });
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).send('Error fetching data');
+  }
+});
+
+app.get('/api/teams', apiKeyMiddleware, async (req, res) => {
+  try {
+    const query = 'SELECT * FROM premier_league_teams';
+    const result = await pool.query(query);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+    res.status(500).send('Error fetching teams from the database.');
+  }
+});
+
 
 app.listen(3010, () => {
     console.log('Server started on port 3010');

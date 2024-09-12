@@ -28,6 +28,7 @@ services:
     environment:
      - DATABASE_URL    # To use your production database connection string, use `defang config set DATABASE_URL`
      - FOOTBALL_DATA_API_KEY
+     - PERSONAL_API_KEY
     #deploy:
     #  resources:
     #    reservations:

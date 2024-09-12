@@ -7,7 +7,9 @@ export const HomePage = () => {
   const [matches, setMatches] = useState([]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/api/matches`)
+    fetch(`${process.env.REACT_APP_API_URL}/api/matches`, {
+      headers: {'x-api-key': process.env.REACT_APP_PERSONAL_API_KEY }
+    })
     .then(res => res.json())
     .then(data => {
       console.log("Data received:", data);
